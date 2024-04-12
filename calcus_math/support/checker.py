@@ -13,6 +13,7 @@ def check_results(initial_function, interpolated_function, symbol, start_x, fini
          : param points_number: количество взятых узлов
          : param x_value: Интересующая точка
     """
+    x_value += -0.02
     param = 1
 
     # Инициализация -------------------------------------------------------------------------------
@@ -25,7 +26,7 @@ def check_results(initial_function, interpolated_function, symbol, start_x, fini
 
     R_min = abs((dnf(initial_function, symbol, points_number - param).subs(symbol, x_min_value)
              / factorial(points_number - param)
-             * omega(start_x, finish_x, points_number, symbol, points_number - param)).subs(symbol, x_value))
+             * omega(start_x, finish_x, points_number, symbol)).subs(symbol, x_value))
 
     R_max = abs((dnf(initial_function, symbol, points_number - param).subs(symbol, x_max_value)
              / factorial(points_number - param)

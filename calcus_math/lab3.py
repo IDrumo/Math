@@ -1,6 +1,7 @@
 from sympy import *
 from support.interpolations import *
 from support.checker import *
+from support.painter import *
 import matplotlib.pyplot as plt
 
 
@@ -22,8 +23,16 @@ def main():
     all_x = [a + i * h for i in range(n + 1)]
     all_y = [f.subs(x, xi) for xi in all_x]
 
-    new_f = lagrange(all_x, all_y, x)
-    check_results(f, new_f, x, a, b, n, x_triple_star)
+    lagrange_function = lagrange(all_x, all_y, x)
+    lagrange_df = dnf(lagrange_function, x, 1)
+    df = dnf(f, x, 1)
+    # paint_function(lagrange_df, a, b)
+    # paint_function(df, a, b)
+
+    print(lagrange_df.subs(x, a))
+    print(df.subs(x, a))
+
+    check_results(f, lagrange_function, x, a, all_x[-1], 10, a)
 
 
 if __name__ == "__main__":
