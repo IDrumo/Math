@@ -1,5 +1,5 @@
-from calcus_math.support.subs import *
-from calcus_math.support.interpolations import *
+from calcus_math.pract.support.subs import *
+from calcus_math.pract.support.interpolations import *
 
 
 def check_results(initial_function, interpolated_function, symbol, start_x, finish_x, points_number, x_value):
@@ -13,7 +13,7 @@ def check_results(initial_function, interpolated_function, symbol, start_x, fini
          : param points_number: количество взятых узлов
          : param x_value: Интересующая точка
     """
-    x_value += -0.02
+    x_value += 0
     param = 1
 
     # Инициализация -------------------------------------------------------------------------------
@@ -34,6 +34,8 @@ def check_results(initial_function, interpolated_function, symbol, start_x, fini
 
     R_min, R_max = (R_min, R_max) if R_min <= R_max else (R_max, R_min)
     R = abs(interpolated_function.subs(symbol, x_value) - initial_function.subs(symbol, x_value))
+
+    print(R_min, R, R_max)
 
     if R_min <= R <= R_max:
         print("Ok")

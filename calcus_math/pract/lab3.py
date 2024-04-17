@@ -32,7 +32,7 @@ def main():
     print(lagrange_df.subs(x, a))
     print(df.subs(x, a))
 
-    check_results(f, lagrange_function, x, a, all_x[-1], 10, a)
+    check_results(df, lagrange_df, x, a, all_x[-1], 10, a)
 
 
 if __name__ == "__main__":
