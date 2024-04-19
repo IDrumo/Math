@@ -16,6 +16,8 @@ def main():
     all_x = [a + i * h for i in range(n + 1)]
     all_y = [f.subs(x, xi) for xi in all_x]
 
+    # Проверка функций на точность:
+
     check_integral(a, b, f, x,
                    left_rectangle_rule(a, b, n, f, x),
                    Newton_Cotes_method(a, b, f, x, 6 * 1),
