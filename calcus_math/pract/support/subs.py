@@ -57,31 +57,5 @@ def newton_cotes_coefficient(index, point_number):
 def get_all_NC_coefficient(point_number):
     return [newton_cotes_coefficient(i, point_number) for i in range(point_number + 1)]
 
-def check_integral(x_start, x_finish, function, symbol, *args):
-    """
-        Сравнить значение интеграла функции со значениями в массиве
-        : param x_start: начало промежутка интегрирования
-        : param x_finish: конец промежутка интегрирования
-        : param function: исходная функция
-        : param symbol: переменная интегрирования
-        : param args: массив со сравниваемыми значениями
-    """
-
-    func = integrate(function, (symbol, x_start, x_finish))
-
-    min_err = args[0]
-    min_err_index = 0
-    max_err = args[0]
-    max_err_index = 0
-
-    for i, value in enumerate(args):
-        min_err = value if value < min_err else min_err
-        min_err_index = i if value < min_err else min_err_index
-        max_err = value if value > max_err else max_err
-        max_err_index = i if value > max_err else max_err_index
-        print(f"Погрешность вычисления для значения с индексом {i} равна: {abs(value - func)}")
-
-    print(f"(НАИМЕНЕЕ ТОЧНОЕ) Максимальная погрешность с {max_err_index} значением. Она равна: {max_err}")
-    print(f"(НАИБОЛЕЕ ТОЧНОЕ) Минимальная погрешность с {min_err_index} значением. Она равна: {min_err}")
 
 
