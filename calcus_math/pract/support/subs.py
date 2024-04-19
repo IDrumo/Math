@@ -1,4 +1,4 @@
-from sympy import diff, symbols
+from sympy import diff, symbols, integrate, factorial
 
 
 def dnf(func, symbol, n):
@@ -33,3 +33,22 @@ def omega(start_value, finish_value, points_number, symbol, counter=0):
         start_value += step
         k += 1
     return result
+
+
+def newton_cotes_coefficients(index, point_number):
+    """
+        Получить коэффициенты Ньютона-Котеса
+        : param index: индекс интересующего коэффициента
+        : param point_number: количество точек учавствуюхих в процессе
+    """
+    x = symbols('x')
+    frac = 1 / (x - index)
+    for i in range(point_number + 1):
+        frac *= (x - i)
+    calc_integral = integrate(frac, (x, 0, point_number))
+
+    Hi = 1 / point_number \
+         * ((-1) ** (point_number - index)) / (factorial(index) * factorial(point_number - index)) \
+         * calc_integral
+
+    return Hi
