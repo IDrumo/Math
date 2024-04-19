@@ -35,7 +35,7 @@ def omega(start_value, finish_value, points_number, symbol, counter=0):
     return result
 
 
-def newton_cotes_coefficients(index, point_number):
+def newton_cotes_coefficient(index, point_number):
     """
         Получить коэффициенты Ньютона-Котеса
         : param index: индекс интересующего коэффициента
@@ -52,3 +52,7 @@ def newton_cotes_coefficients(index, point_number):
          * calc_integral
 
     return Hi
+
+
+def get_all_NC_coefficient(point_number):
+    return [newton_cotes_coefficient(i, point_number) for i in range(point_number + 1)]
