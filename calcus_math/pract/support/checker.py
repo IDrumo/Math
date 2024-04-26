@@ -1,5 +1,5 @@
-from calcus_math.pract.support.subs import *
 from calcus_math.pract.support.interpolations import *
+from calcus_math.pract.support.subs import *
 
 
 def check_results(initial_function, interpolated_function, symbol, start_x, finish_x, points_number, x_value):

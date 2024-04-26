@@ -2,7 +2,6 @@ from sympy import symbols, exp
 
 from calcus_math.pract.support.checker import check_integral
 from calcus_math.pract.support.integrations import left_rectangle_rule, gaussian_quadrature, Newton_Cotes_method
-from support.subs import newton_cotes_coefficient, get_all_NC_coefficient
 
 
 def main():
@@ -22,8 +21,6 @@ def main():
                    left_rectangle_rule(a, b, n, f, x),
                    Newton_Cotes_method(a, b, f, x, 6 * 1),
                    gaussian_quadrature(a, b, f, 4 * 1, x))
-
-
 
 
 if __name__ == "__main__":
