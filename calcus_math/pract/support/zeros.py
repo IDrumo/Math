@@ -1,5 +1,6 @@
 import sympy as sp
 
+
 def find_roots(f, a, b, epsilon, flag='all'):
     """
     Находит корни функции f(x) на интервале [a, b] с заданной точностью epsilon.
@@ -35,6 +36,7 @@ def find_roots(f, a, b, epsilon, flag='all'):
 
     return roots
 
+
 def find_intervals(f, a, b):
     """
     Находит интервалы на отрезке [a, b], содержащие корни функции f(x).
@@ -52,7 +54,7 @@ def find_intervals(f, a, b):
     step = (b - a) / 1000
     x_prev = a
     f_prev = f.subs(x, x_prev)
-    for x_curr in [a + i*step for i in range(1, 1001)]:
+    for x_curr in [a + i * step for i in range(1, 1001)]:
         f_curr = f.subs(x, x_curr)
         if f_prev * f_curr < 0:
             intervals.append((x_prev, x_curr))
@@ -62,9 +64,10 @@ def find_intervals(f, a, b):
         f_prev = f_curr
     return intervals
 
+
 def find_root_on_interval(f, interval, epsilon):
     """
-    Находит корень функции f(x) на заданном интервале с помощью комбинации
+    Находит корень функции f(x) на заданном интервале с помощью
     методов касательных и секущих.
 
     Параметры:
@@ -77,18 +80,23 @@ def find_root_on_interval(f, interval, epsilon):
     """
     x = sp.Symbol('x')
     x_left, x_right = interval
+
     while abs(x_right - x_left) > epsilon:
         f_left = f.subs(x, x_left)
         f_right = f.subs(x, x_right)
-        if f_left * sp.diff(f, x).subs(x, x_left) >= 0:
+
+        if f_left * sp.diff(sp.diff(f, x), x).subs(x, x_left) >= 0:
+            # приближение по методу касательных
             x_new = x_left - f_left / sp.diff(f, x).subs(x, x_left)
-            x_right = x_right - f_right * (x_left - x_right) / (f_left - f_right)
+            # приближение по методу хорд
+            x_right = x_right - f_right * (x_left - x_right) / (f_left - f_right) # итерационный процесс с конечными разностями
             x_left = x_new
         else:
             x_new = x_right - f_right / sp.diff(f, x).subs(x, x_right)
             x_left = x_left - f_left * (x_right - x_left) / (f_right - f_left)
             x_right = x_new
     return (x_left + x_right) / 2
+
 
 def filter_roots(roots, flag):
     """
