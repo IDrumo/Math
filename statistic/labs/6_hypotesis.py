@@ -211,7 +211,7 @@ def normal_base_unknown_different_variation():
     alpha = 0.05
 
     df = (sample_c.var(ddof=1) / n + sample_A.var(ddof=1) / m) ** 2 / (
-            sample_c.var(ddof=1) / (n ** 2 * (n - 1)) + sample_A.var(ddof=1) / (m ** 2 * (m - 1)))
+            sample_c.var(ddof=1)**2 / (n ** 2 * (n - 1)) + sample_A.var(ddof=1)**2  / (m ** 2 * (m - 1)))
 
     t_observe = np.abs(sample_c.mean() - sample_A.mean() - (0)) / np.sqrt(
         sample_c.var(ddof=1) / n + sample_A.var(ddof=1) / m)

@@ -5,7 +5,7 @@ import scipy.stats as dist
 
 
 def main():
-    # будем моделировать количество орлов в серии из 20 подбрасываний
+    # будем моделировать количество орлов в серии из 30 подбрасываний
     generate_sample(10)
     generate_sample(50)
     generate_sample(100)

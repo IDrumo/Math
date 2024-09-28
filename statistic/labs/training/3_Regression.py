@@ -24,7 +24,7 @@ def main():
 
     clear_data = dater[(dater['density'] <= 1.01)]  # почистил от выбросов
     dater = clear_data
-    clear_data.plot.scatter(x='density', y='alcohol')
+    dater.plot.scatter(x='density', y='alcohol')
     # plt.show()
     plt.clf()
     plt.close('all')

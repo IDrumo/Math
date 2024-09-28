@@ -92,20 +92,21 @@ def main():
 
     # Оценим медиану методом Bootstrap
 
-    sample = (sample_100,)
+    chosen_sample = sample_1000
+    sample = (chosen_sample,)
     bootstrap = dist.bootstrap(sample, np.median, confidence_level=0.95, method='percentile')
-    bootstrap_mine = my_bootstrap(sample_100, np.median, 0.05)
+    bootstrap_mine = my_bootstrap(chosen_sample, np.median, 0.05)
     # print(bootstrap.confidence_interval)
     # print(bootstrap_mine)
     plt.plot(x, rv_norm.pdf(x), 'blue')
 
     vline_size = 0.04
     plt.vlines(mu, 0, vline_size, 'blue', label='True Median')
-    plt.vlines(np.median(sample_100), 0, vline_size, 'Red', label='Sample Median')
+    plt.vlines(np.median(chosen_sample), 0, vline_size, 'Yellow', label='Sample Median')
     plt.vlines([bootstrap.confidence_interval[0], bootstrap.confidence_interval[1]], 0, vline_size, 'red',
                label='Confidence interval')
-    plt.vlines([bootstrap_mine[0], bootstrap_mine[1]], 0, vline_size, 'green',
-               label='My Confidence interval') # МОЙ ОЧЕНЬ ХОРОШИЙ!!!
+    # plt.vlines([bootstrap_mine[0], bootstrap_mine[1]], 0, vline_size, 'green',
+    #            label='My Confidence interval') # МОЙ ОЧЕНЬ ХОРОШИЙ!!!
 
     plt.legend()
     plt.show()

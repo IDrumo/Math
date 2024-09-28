@@ -32,9 +32,9 @@ def main():
     print()
     print(np.cov(sample1, sample2))
     print()
-    print(f'Var(X+Y) = {np.var(sample1 + sample2)}')
-    print(f'Var(X+Y) = {np.var(sample1) + np.var(sample2) + 2 * np.cov(sample1, sample2)[0, 1]}' )
-    print(f'Var(X+Y) = {np.cov(sample1, sample2).sum()}')
+    print(f'Var(X+Y) = {np.var(sample1 + sample2, ddof=1)}')
+    print(f'Var(X+Y) = {np.var(sample1, ddof=1) + np.var(sample2, ddof=1) + 2 * np.cov(sample1, sample2, ddof=1)[0, 1]}')
+    print(f'Var(X+Y) = {np.cov(sample1, sample2, ddof=1).sum()}')
 
 
 if __name__ == '__main__':

@@ -8,6 +8,7 @@ import matplotlib.pyplot as plt
 plt.rcParams['figure.figsize'] = [12, 12]
 
 
+
 def main():
     # Шаг 1: Загрузка и первичный осмотр данных
     data = pd.read_csv('../data/анализ крови.csv')
@@ -32,10 +33,10 @@ def main():
     plt.clf()
 
     # Шаг 5: Выявление выбросов и аномалий
-    plt.close('all') # закрываем все холсты
+    plt.close('all')  # закрываем все холсты
     fig, axs = plt.subplots(1, len(data2.columns), figsize=(12, 12))
     for i, ax in enumerate(axs.flat):
-        ax.boxplot(data2.iloc[:, i]) # Запихиваем коробку с усами на полотно.
+        ax.boxplot(data2.iloc[:, i])  # Запихиваем коробку с усами на полотно.
         ax.set_title(data2.columns[i])
     plt.tight_layout()
     # plt.show()
