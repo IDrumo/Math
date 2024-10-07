@@ -70,8 +70,8 @@ def gauss_with_pivoting_first_exemplar(matrix, free_column, x=None):
 
 
 def gauss_with_pivoting(matrix, free_column):
-    for k in range(matrix.shape[0] - 1):
 
+    for k in range(matrix.shape[0] - 1):
         # поиск строки с максимальным элементом
         max_elem = 0
         string_number = 0
@@ -111,26 +111,29 @@ def gauss_with_pivoting(matrix, free_column):
 if __name__ == '__main__':
     A = np.array([
         [0.411, 0.421, -0.333, 0.313, -0.141, -0.381, 0.245],
-        [2.241, 0.705, 0.139, -0.409, 0.321, 0.0625, 0.101],
+        [0.241, 0.705, 0.139, -0.409, 0.321, 0.0625, 0.101],
         [0.123, -0.239, 0.502, 0.901, 0.243, 0.819, 0.321],
         [0.413, 0.309, 0.801, 0.865, 0.423, 0.118, 0.183],
         [0.241, -0.221, -0.243, 0.134, 1.274, 0.712, 0.423],
         [0.281, 0.525, 0.719, 0.118, -0.974, 0.808, 0.923],
         [0.246, -0.301, 0.231, 0.813, -0.702, 1.223, 1.105]
     ])
+    A1 = A.copy()
     b = np.array([0.096, 1.252, 1.024, 1.023, 1.155, 1.937, 1.673])
+    b1 = b.copy()
     x_answer = np.array([11.092, -2.516, 0.721, -2.515, -1.605, 3.624, -4.95])
 
+    print(np.linalg.solve(A1, b1))
     x = gauss_with_pivoting(A, b)
     print(x)
-    print(np.linalg.solve(A, b))
 
     print(
         "Модуль разности полученного решения и решения через библиотеку np: \n" +
-        str(np.linalg.norm(np.linalg.solve(A, b) - x))
+        f"{np.linalg.norm(np.linalg.solve(A1, b1) - x)}"
     )
 
+    # print(A)
     print(
-        "Модуль разности произведения матрицы на наш вектор ответа и вектора свободных членов: \n" +
-        str(np.linalg.norm(A @ x - b))
+        "Модуль разности произведения матрицы на вектор ответа и вектора свободных членов: \n" +
+        f"{np.linalg.norm(A1 @ x - b1)}"
     )
