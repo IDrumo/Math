@@ -1,10 +1,10 @@
 from sympy import symbols, exp
 
-from calcus_math.pract.support.checker import check_integral
-from calcus_math.pract.support.integrations import left_rectangle_rule, gaussian_quadrature, Newton_Cotes_method
+from calcus_math.course2.support.checker import check_integral
+from calcus_math.course2.support.integrations import left_rectangle_rule, gaussian_quadrature, Newton_Cotes_method
 
 
-def main():
+def main(): 
     # Определение переменной и функции
     x = symbols('x')
     f = (x - 1) ** 2 - exp(-x)
