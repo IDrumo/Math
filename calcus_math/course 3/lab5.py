@@ -1,5 +1,6 @@
 import numpy as np
 
+
 def cholesky_decomposition(A):
     n = A.shape[0]
     S = np.zeros_like(A, dtype=complex)
@@ -13,6 +14,7 @@ def cholesky_decomposition(A):
 
     return S
 
+
 def solve_lower_triangular(S, b):
     n = S.shape[0]
     y = np.zeros(n, dtype=complex)
@@ -22,20 +24,27 @@ def solve_lower_triangular(S, b):
 
     return y
 
+
 def solve_upper_triangular(S, y):
     n = S.shape[0]
     x = np.zeros(n, dtype=complex)
 
     for i in range(n - 1, -1, -1):
-        x[i] = (y[i] - np.sum(S[i, i + 1:] * x[i + 1:])) / S[i, i]
+        x[i] = (y[i] - np.sum(S[i + 1:, i] * x[i + 1:])) / S[i, i]
 
     return x
 
+
 def solve_systems(A, b):
     S = cholesky_decomposition(A)
+
+    # Решение S @ y = b
     y = solve_lower_triangular(S, b)
-    x = solve_upper_triangular(S.T, y)  # Используем транспонированную матрицу S
+
+    # Решение S.T @ x = y
+    x = solve_upper_triangular(S, y)  # Используем транспонированную матрицу S
     return x, y
+
 
 if __name__ == '__main__':
     A = np.array([
