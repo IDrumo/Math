@@ -68,3 +68,9 @@ if __name__ == '__main__':
     # Решение системы уравнений Ax = b
     x = A_inv * b.reshape(-1, 1)  # Умножение обратной матрицы на вектор b
     print("\nРешение системы Ax = b:\n", x)
+
+    # Проверка невязки
+    residual = A @ x - b.reshape(-1, 1)  # Невязка
+    print("\nНевязка Ax - b:\n", residual)
+    residual_norm = np.linalg.norm(residual)  # Норма невязки
+    print("Норма невязки:", residual_norm)
