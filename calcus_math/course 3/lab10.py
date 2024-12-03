@@ -79,12 +79,15 @@ def calculate(A: np.array, p: int) -> np.array:
     i, j = find_ij(A)
     sigma = sigmas(A, p)
 
+    i = 0
+
     while not is_enough(A, sigma, i, j):
         iteration(A, C, i, j)
         A = C.copy()
         i, j = find_ij(A)
+        i += 1
 
-    return C
+    return C, i
 
 
 def main():
@@ -108,12 +111,13 @@ def main():
 
     for name, (A, expected_eigenvalues) in matrices.items():
         print(f"Вычисление для {name}:")
-        solution = calculate(A, 5)
+        solution, iter = calculate(A, 5)
         computed_eigenvalues = np.linalg.eigvals(solution)
+        print(iter)
         print("Вычисленные собственные значения:", computed_eigenvalues)
         print("Ожидаемые собственные значения:", expected_eigenvalues)
         print("Собственные значения совпадают:",
-              np.allclose(np.sort(computed_eigenvalues), np.sort(expected_eigenvalues), atol=1e-3))
+              np.allclose(np.sort(computed_eigenvalues), np.sort(expected_eigenvalues), atol=1e-10))
         # Проверка на принадлежность к уравнению det(A - I*lambda) = 0
         dets = [np.linalg.det(A - eigenval * np.eye(A.shape[0])) for eigenval in computed_eigenvalues]
         print("Определители для det(A - I*lambda):", dets)

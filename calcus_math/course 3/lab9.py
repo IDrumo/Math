@@ -1,44 +1,14 @@
 import numpy as np
-from scipy.optimize import minimize
-
-# materials_directory_path = '../../optimization_methods/pract/materials/system_state.npz'
-materials_directory_path = 'materials/system_state.npz'
 
 
-# Генерация положительно определенной матрицы A с целыми числами
-def generate_positive_definite_matrix(size):
-    A = np.random.randint(0, 3, (size, size))  # Генерация целых чисел от 0 до 3
-    A = np.dot(A, A.T)  # Положительно определенная матрица
-    return A
-
-
-# Сохранение матрицы A и вектора b в один файл
-def save_system_state(A, b, filename):
-    np.savez(filename, A=A, b=b)
-
-
-# Считывание матрицы A и вектора b из файла
-def load_system_state(filename):
-    data = np.load(filename)
-    return data['A'], data['b']
-
-
-# Отображение матрицы и вектора
-def display_matrix_and_vector(A, b):
-    print("Сохраненная матрица A:")
-    print(A)
-    print("Сохраненный вектор b:")
-    print(b)
-
-
-# Функция f_0(x)
+# Функция оптимизации
 def f_0(x, A, b):
-    return 0.5 * np.dot(x.T, np.dot(A, x)) + np.dot(b, x)
+    return 0.5 * np.dot(x.T, np.dot(A, x)) - np.dot(b, x)
 
 
-# Градиент функции f_0(x)
+# Градиент функции оптимизации
 def gradient_f_0(x, A, b):
-    return np.dot(A, x) + b
+    return np.dot(A, x) - b
 
 
 # Метод градиентного спуска
@@ -55,7 +25,7 @@ def gradient_descent(A, b, x0, eps=1e-10, max_iterations=1000):
     x = x0
 
     for i in range(max_iterations):
-        r_k = np.dot(A, x) + b  # Остаток
+        r_k = np.dot(A, x) - b  # Остаток
         mu_k = mu(r_k, A)  # Вычисляем mu
 
         x_new = x - mu_k * gradient_f_0(x, A, b)  # Обновляем x
@@ -71,44 +41,6 @@ def gradient_descent(A, b, x0, eps=1e-10, max_iterations=1000):
 
 # Основной код
 if __name__ == "__main__":
-    size = 4
-    # Генерируем матрицу A
-    A = generate_positive_definite_matrix(size)
-
-    # Генерация вектора b с целыми числами
-    b = np.random.randint(1, 10, size)  # Генерация целых чисел от 1 до 9
-
-    # Сохраняем состояние системы в файл
-    # save_system_state(A, b, materials_directory_path)
-
-    # Считываем состояние системы из файла
-    A_loaded, b_loaded = load_system_state(materials_directory_path)
-
-    # Отображаем загруженную матрицу и вектор
-    display_matrix_and_vector(A_loaded, b_loaded)
-
-    # Начальная точка
-    x0 = np.zeros(size)
-
-    # Находим минимум
-    x_min, iterations = gradient_descent(A_loaded, b_loaded, x0, max_iterations=10000)
-
-    print("Минимум функции f_0(x) достигается в точке:", x_min)
-    print("За ", iterations, " итераций")
-    print("Значение функции в этой точке:", f_0(x_min, A_loaded, b_loaded))
-    print()
-
-    # Находим минимум с помощью функции minimize
-    result = minimize(f_0, x0, args=(A_loaded, b_loaded), method='BFGS', jac=gradient_f_0)
-
-    if result.success:
-        x_min = result.x
-        print("Минимум функции f_0(x) достигается в точке:", x_min)
-        print("Значение функции в этой точке:", result.fun)
-    else:
-        print("Не удалось найти минимум функции.")
-
-    print()
 
     A = np.array([
         [10.9, 1.2, 2.1, 0.9],
@@ -118,12 +50,12 @@ if __name__ == "__main__":
     ])
 
     # Вектор b
-    b = np.array([1, 2, 3, 4])  # Пример вектора b
+    b = np.array([1, 2, 3, 4])
 
-    # Находим минимум с новым значением learning_rate
-    x0 = np.zeros(size)
-    x_min, iterations = gradient_descent(A, b, x0, max_iterations=10000)
+    x0 = np.zeros(b.size)
+    x_star, iterations = gradient_descent(A, b, x0, max_iterations=10000)
 
-    print("Минимум функции f_0(x) достигается в точке:", x_min)
+    print("Решение системы Ax + b = 0 достигается в точке:", x_star)
     print("За ", iterations, " итераций")
-    print("Значение функции в этой точке:", f_0(x_min, A, b))
+    print("Невязка полученного решения:", np.linalg.norm(np.dot(A, x_star) - b))
+    print("Истинное посчитанное решение (встроенный метод): ", np.linalg.solve(A, b))

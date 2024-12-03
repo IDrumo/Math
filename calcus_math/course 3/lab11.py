@@ -17,7 +17,7 @@ def rotation_method(A: np.array, p: int = 10) -> np.array:
     def s(i, j):
         return sgn(A[i, j] * (A[i, i] - A[j, j])) * np.sqrt(0.5 * (1 - abs(A[i, i] - A[j, j]) / d(i, j)))
 
-    def iteration(C, i, j):
+    def step(C, i, j):
         n = A.shape[0]
         C.fill(0)
         for k in range(n):
@@ -52,28 +52,48 @@ def rotation_method(A: np.array, p: int = 10) -> np.array:
                     indexes[0], indexes[1] = i, j
         return indexes[0], indexes[1]
 
-    def stop_condition(sigma, i, j):
-        return all(abs(A[i, j]) < s for s in sigma)
+    def stop_condition(sigma):
+        for i in range(A.shape[0]):
+            for j in range(i + 1, A.shape[0]):
+                if abs(A[i, j]) > min(sigma):
+                    return False
+        return True
 
     def sigmas():
         return [np.sqrt(max(A[i, i] for i in range(A.shape[0]))) / (10 ** k) for k in range(1, p + 1)]
 
+    A = A.copy()
     n = A.shape[0]
     C = np.zeros_like(A)
-    i, j = find_max()
+
     sigma = sigmas()
     iterat = 0
 
-    while not stop_condition(sigma, i, j):
-        iteration(C, i, j)
-        A = C.copy()
+    while not stop_condition(sigma):
         i, j = find_max()
+        step(C, i, j)
+        A = C.copy()
         iterat += 1
 
     return np.sort(np.diag(A)), iterat
 
 
+def checkMatrix(matrix):
+    if matrix.shape[0] != matrix.shape[1]:
+        return False
+
+    if not np.allclose(matrix, matrix.T):
+        return False
+
+    minors = [np.linalg.det(matrix[:i, :i]) for i in range(1, matrix.shape[0] + 1)]
+    return all(minor > 0 for minor in minors)
+
+
 def richardson_method(A: np.array, b: np.array, x: np.array, eps: float = 1e-10, max_iter=100, n=20):
+    if not checkMatrix(A):
+        print("Матрица не положительно определена и/или не симметрическая")
+        return x, 0
+
     lambdas, i = rotation_method(A)
     lambda_min, lambda_max = lambdas[0], lambdas[-1]
     tau_0 = 2 / (lambda_min + lambda_max)
