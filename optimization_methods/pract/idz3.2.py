@@ -52,7 +52,7 @@ def matrix_type_for_minors(minors):
     elif all(minors[i] * (-1) ** i > 0 for i in range(len(minors))):  # Чередование знаков
         type_point = "Точка является локальным максимумом."
     else:
-        type_point = "Точка неопределена."
+        type_point = "Матрица неопределена."
     return type_point
 
 

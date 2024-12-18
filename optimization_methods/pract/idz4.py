@@ -1,163 +1,184 @@
 import numpy as np
-import sympy as sp
+from scipy.optimize import minimize
 
-
-def generate_lagrange_function(f, g, lambd):
-    lagrange_function = f + lambd * g
-    return lagrange_function
-
-
-# Функция для вычисления Гессиана
-def manual_hessian(func, variables):
-    n = len(variables)
-    hessian = sp.Matrix(n, n, lambda i, j: sp.diff(sp.diff(func, variables[i]), variables[j]))
-    return hessian
-
-
-def g(x, x0, r):
-    return sp.Add(*[sp.sqrt(x[i] - x0[i]) for i in range(len(x))]) - r
-
-
-def analyze_hessian(lagrange_function, vars, solution):
-    """
-    Вычисляет Гессиан функции Лагранжа и определяет тип критической точки.
-
-    Args:
-        lagrange_function: Функция Лагранжа, для которой нужно вычислить Гессиан.
-        vars: Переменные, по которым вычисляется Гессиан.
-        solution: Найденные значения переменных (включая λ).
-
-    Returns:
-        Определитель Гессиана и строка с типом критической точки.
-    """
-
-    # Определяем Гессиан
-    hessian_func = manual_hessian(lagrange_function, vars)
-
-    # Подставляем найденные значения в функцию Лагранжа, при этом λ = 0
-    substituted_lagrange_function = lagrange_function.subs({vars[-1]: 0})  # vars[-1] — это λ
-
-    # Определяем Гессиан
-    hessian_func = manual_hessian(substituted_lagrange_function, vars)
-
-    # Вычисляем определитель Гессиана
-    det_hessian = hessian_func.det().subs({vars[i]: solution[vars[i]] for i in range(len(vars) - 1)})
-
-    # Проверяем знак определителя и определяем тип критической точки
-    if det_hessian > 0:
-        type_point = "Точка является локальным максимумом."
-    elif det_hessian < 0:
-        type_point = "Точка является локальным минимумом."
-    else:
-        type_point = "Точка неопределена."
-
-    return det_hessian, type_point
-
-
-def gradient(func, vars):
-    return sp.Matrix([sp.diff(func, var) for var in vars])
+from subs.lagrange import LagrangeFunction
+from subs.vizualizers import SurfaceVisualizer
 
 
 def f(x, A, b):
     """
-    Функция оптимизации
+    Функция для вычисления значения целевой функции f(x) = 1/2 * (x^T * A * x) - b * x.
     """
-    return 0.5 * x.T @ A @ x + b.T @ x
+    return 0.5 * np.dot(x.T, np.dot(A, x)) - np.dot(b, x)
 
 
-def newton_method_multidimensional(func, x0, vars, tol=1e-6, max_iter=100):
+def is_positive_definite(matrix):
     """
-    Метод Ньютона для многомерного случая поиска нулевого значения функции Лагранжа.
+    Проверка, является ли матрица положительно определенной.
+    """
+    if matrix.shape[0] != matrix.shape[1]:
+        return False
+
+    for i in range(1, matrix.shape[0] + 1):
+        minor = matrix[:i, :i]
+        if np.linalg.det(minor) <= 0:
+            return False
+
+    return True
+
+
+def gradient_descent(A, b, x0, alpha=1, eps=1e-10, max_iter=10000):
+    """
+    Алгоритм градиентного спуска для нахождения минимума функции.
 
     Args:
-      func: Функция оптимизации.
-      x0: Начальная точка (вектор).
-      tol: Точность.
-      max_iter: Максимальное количество итераций.
+        A (np.array): Матрица.
+        b (np.array): Вектор.
+        x0 (np.array): Начальная точка.
+        alpha (float): Шаг.
+        eps (float): Точность.
+        max_iter (int): Максимальное количество итераций.
 
     Returns:
-      Решение и количество итераций.
+        np.array: Минимум.
+        float: Значение функции в минимуме.
+        int: Количество итераций.
     """
+    if not is_positive_definite(A):
+        raise ValueError("Матрица A должна быть положительно определенной.")
 
-    x = np.array(x0, dtype=float)  # Преобразуем x0 в массив NumPy для удобства
+    x = x0
+    iterations = 0
 
     for i in range(max_iter):
-        # Вычисляем Гессиан функции Лагранжа
-        hess = manual_hessian(func, vars)
+        grad = A @ x - b
 
-        sp.pprint(hess)
+        x_new = x - alpha * grad  # Обновляем x
 
-        # Подставляем текущее значение x в Гессиан
-        hess_eval = hess.subs({vars[i]: x[i] for i in range(len(vars))}).inv()
+        if f(x_new, A, b) > f(x, A, b):
+            alpha /= 2  # Уменьшаем шаг, если значение функции возросло
 
-        # Вычисляем градиент функции Лагранжа
-        grad = gradient(lagrange_function, vars).subs({vars[j]: x[j] for j in range(len(vars))})
+        if np.linalg.norm(grad) < eps:  # Условие остановки
+            break
 
-        # Проверяем выполнение условия сходимости
-        if np.linalg.norm(grad) < tol:
-            return x, i
+        x = x_new
+        iterations += 1
 
-        # Метод Гаусса: решаем систему уравнений для W^{-1}(x_k) * f(x_k)
-        step = np.linalg.solve(hess_eval, grad)  # Находим W^{-1}(x_k) * f(x_k)
-        x = x - step  # Обновляем x
-
-    return x, max_iter
+    return x, f(x, A, b), iterations  # Возвращаем результат и количество итераций
 
 
-if __name__ == "__main__":
-    # Ввод данных
-    A = np.array([[1, 2, 3, 4],
-                  [2, 5, 6, 7],
-                  [3, 6, 8, 9],
-                  [4, 7, 9, 10]])
+def coordinate_descent(A, b, x0, h=0.1, max_iter=10000, eps=1e-10):
+    """
+    Алгоритм покоординатного спуска для нахождения минимума функции.
 
-    b = np.array([1, 2, 3, 4])
+    Args:
+        A (np.array): Матрица.
+        b (np.array): Вектор.
+        x0 (np.array): Начальная точка.
+        h (float): Шаг для проверки.
+        max_iter (int): Максимальное количество итераций.
+        eps (float): Допустимая погрешность.
 
-    x0 = np.array([0, 0, 0, 0])
+    Returns:
+        np.array: Минимум.
+        float: Значение функции в минимуме.
+        int: Количество итераций.
+    """
+    h = [h] * x0.size
+    x = x0
+    iterations = 0
 
-    r = 1.0
+    for i in range(max_iter):
+        old_f = f(x, A, b)
 
-    # Определение переменных
-    x1, x2, x3, x4, lambd = sp.symbols('x1 x2 x3 x4 lambd')
-    x = [x1, x2, x3, x4]
-    vars = [x1, x2, x3, x4, lambd]
+        for j in range(len(x)):
+            x_temp = x.copy()
 
-    # Определение функции и ограничений
-    func = f(np.array([x1, x2, x3, x4]), A, b)  # Используем функцию f с A и b
-    g = g(x, x0, r)  # функция ограничения
+            # Проверяем, увеличится ли функция, если мы изменим j-ю координату
+            x_temp[j] += h[j]
+            if f(x_temp, A, b) < old_f:
+                x = x_temp
+                continue
 
-    # Генерация функции Лагранжа
-    lagrange_function = generate_lagrange_function(func, g, lambd)
+            x_temp[j] -= 2 * h[j]  # Уменьшаем j-ю координату
+            if f(x_temp, A, b) < old_f:
+                x = x_temp
+                continue
 
-    gradient_lagrange_function = gradient(lagrange_function, vars)
+            x_temp[j] += h[j]  # Возвращаем j-ю координату обратно
 
-#----------------------------------lambda = 0-------------------------------------------
-    # Условие: приравниваем градиент к нулю и подставляем λ = 0
-    gradient_lagrange_function_zero_lambda = gradient_lagrange_function.subs(lambd, 0)
+            h[j] /= 2  # Уменьшаем шаг, если не нашли улучшения
 
-    # Создаем систему уравнений
-    equations = [sp.Eq(grad, 0) for grad in gradient_lagrange_function_zero_lambda]
+        if np.abs(old_f - f(x, A, b)) < eps:  # Условие остановки
+            break
 
-    # Решаем систему уравнений
-    solutions = sp.solve(equations[:-1], vars[:-1])  # Не решаем для λ, так как λ = 0
+        iterations += 1
 
-    # Выводим решения
-    print("Решения системы уравнений:" + str(solutions))
-
-    # Анализ Гессиана
-    det_hessian, type_point = analyze_hessian(lagrange_function, vars, solutions)
-
-    # Выводим определитель и тип критической точки
-    print(f"Определитель Гессиана: {det_hessian}")
-    print(type_point)
-
-#----------------------------------lambda /= 0-------------------------------------------
-    x0 = np.array([0, 0, 0, 0, 0])
-
-    solution, iterations = newton_method_multidimensional(lagrange_function, x0, vars)
-
-    print(f"Решение: {solution}, Итерации: {iterations}")
+    return x, f(x, A, b), iterations  # Возвращаем результат и количество итераций
 
 
+def main():
+    # Пример использования
+    A = np.array([
+        [2, 3, 1],
+        [2, 7, 2],
+        [1, 3, 3]
+    ])
+    b = np.array([3, 4, 5])
+    x0 = np.array([0 for i in range(b.size)], dtype='float')
+    alpha = 0.5
+    h = 0.1
+
+    # Выполнение градиентного спуска
+    x_min_gd, f_min_gd, iterations_gd = gradient_descent(A, b, x0, alpha)
+    print(
+        f"Градиентный спуск.\nМинимум достигается в: {x_min_gd}, \nзначение функции: {f_min_gd}, \nколичество итераций: "
+        f"{iterations_gd}\n")
+
+    # Выполнение покоординатного спуска
+    x_min_cd, f_min_cd, iterations_cd = coordinate_descent(A, b, x0, h)
+    print(
+        f"Покоординатный спуск.\nМинимум достигается в: {x_min_cd}, \nзначение функции: {f_min_cd}, "
+        f"\nколичество итераций: {iterations_cd}\n")
+
+    # Проверка истинного наименьшего значения через встроенный метод минимизации функции
+    res = minimize(f, x0, args=(A, b), method='BFGS')
+    print(f"Встроенный метод минимизации.\nМинимум достигается в: {res.x}, \nзначение функции: {res.fun}\n")
 
 
+def main2():
+    A = np.array([
+        [2, 3, 1],
+        [2, 7, 2],
+        [1, 3, 3]
+    ])
+    b = np.array([3, 4, 5])
+
+    # Создаем объект класса LagrangeFunction
+    lagrange_func = LagrangeFunction()
+
+    # Устанавливаем целевую функцию
+    lagrange_func.set_optimization_function_with_matrix(A, b)
+
+    # Добавляем ограничения массивом
+    constraints = [lagrange_func.variables[0] + lagrange_func.variables[1] - 1,
+                   lagrange_func.variables[0] - lagrange_func.variables[1]]  # x0 + x1 = 1 и x0 - x1 = 0
+    lagrange_func.add_constraints(constraints)
+
+
+def main3():
+    A = np.array([
+        [2, 3, 1],
+        [2, 7, 2],
+        [1, 3, 3]
+    ])
+    b = np.array([3, 4, 5])
+
+    visualizer = SurfaceVisualizer(A, b)
+    visualizer.visualize_surface()
+
+
+if __name__ == '__main__':
+    main()
+    main2()
+    # main3()

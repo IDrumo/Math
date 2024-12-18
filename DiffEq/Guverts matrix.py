@@ -1,55 +1,82 @@
+import matplotlib.pyplot as plt
 import numpy as np
 
 
-def generate_hurwitz_matrix(coefficients):
-    """
-    Формирует матрицу Гурвица на основе переданного списка коэффициентов.
-
-    :param coefficients: Список коэффициентов многочлена.
-    :return: Матрица Гурвица.
-    """
+def hurwitz_criterion(coefficients):
     n = len(coefficients) - 1
-    hurwitz_matrix = np.zeros((n, n))
+    if n < 1:
+        return False
 
-    # Заполнение матрицы Гурвица
+    # Создаем матрицу Гурвица
+    hurwitz = np.zeros((n, n))
+
     for i in range(n):
         for j in range(n):
-            if j == 0:
-                hurwitz_matrix[i, j] = coefficients[n - i]
-            elif i + j == n - 1:
-                hurwitz_matrix[i, j] = coefficients[0]
-            elif i + j < n - 1:
-                hurwitz_matrix[i, j] = 0
-            else:
-                hurwitz_matrix[i, j] = coefficients[i + j - n + 1]
+            # Индекс в списке коэффициентов
+            index = 2 * i - j + 1
+            if 0 <= index < len(coefficients):
+                hurwitz[i, j] = coefficients[index]
 
-    return hurwitz_matrix
+    # Проверяем определитель главных миноров
+    for k in range(1, n + 1):
+        if np.linalg.det(hurwitz[:k, :k]) <= 0:
+            return False
+
+    return True
 
 
-def main_minors(matrix):
-    """
-    Находит главные миноры переданной матрицы.
+def mikhailov_criterion(coefficients):
+    # Получаем корни характеристического уравнения
+    roots = np.roots(coefficients)
 
-    :param matrix: Входная матрица.
-    :return: Список главных миноров.
-    """
-    n = matrix.shape[0]
-    minors = []
+    # Проверяем, находятся ли корни в левой полуплоскости
+    return all(np.real(roots) < 0)
 
-    for i in range(1, n + 1):
-        minor = np.linalg.det(matrix[:i, :i])
-        minors.append(minor)
 
-    return minors
+def visualize_mikhailov(coefficients):
+    # Получаем корни характеристического уравнения
+    roots = np.roots(coefficients)
+
+    # Визуализация корней в комплексной плоскости
+    plt.figure(figsize=(10, 8))
+
+    # Генерация случайных цветов для каждого корня
+    colors = np.random.rand(len(roots), 3)  # RGB цвета
+
+    for i, root in enumerate(roots):
+        plt.scatter(np.real(root), np.imag(root), color=colors[i], marker='o')
+        plt.text(np.real(root), np.imag(root), f'{root:.2f}', fontsize=10, ha='right', color=colors[i])
+
+    # Отметим оси
+    plt.axhline(0, color='black', lw=0.5, ls='--')
+    plt.axvline(0, color='black', lw=0.5, ls='--')
+
+    # Настройки графика
+    plt.title('Корни характеристического уравнения')
+    plt.xlabel('Действительная часть')
+    plt.ylabel('Мнимая часть')
+    plt.xlim(-2, 1)
+    plt.ylim(-2, 2)
+    plt.grid()
+
+    plt.show()
+
+
+def lienard_shipar_criterion(coefficients):
+    # Получаем корни характеристического уравнения
+    roots = np.roots(coefficients)
+    real_parts = np.real(roots)
+
+    # Проверяем условия устойчивости
+    return all(real_parts < 0)
 
 
 # Пример использования
-coefficients = [1, 2, 4, 3, 2]
-# coefficients = [2, 3, 4, 2, 1]
-hurwitz_matrix = generate_hurwitz_matrix(coefficients)
-print("Матрица Гурвица:")
-print(hurwitz_matrix)
+coeffs = [1, 2, 2, 3]
 
-minors = main_minors(hurwitz_matrix)
-print("Главные миноры:")
-print(minors)
+print("Критерий Гурвица:", hurwitz_criterion(coeffs))
+print("Критерий Михайлова:", mikhailov_criterion(coeffs))
+print("Критерий Льенара-Шипара:", lienard_shipar_criterion(coeffs))
+
+# Визуализация корней
+visualize_mikhailov(coeffs)
