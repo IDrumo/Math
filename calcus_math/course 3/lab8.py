@@ -1,7 +1,7 @@
 import numpy as np
 
 
-def simple_iteration(A, b, x0=None, eps=1e-6, max_iter=1000):
+def simple_iteration(A, b, x0=None, eps=1e-6, max_iter=1000, tau=None):
     """
     Решение СЛАУ методом простой итерации.
 
@@ -21,9 +21,13 @@ def simple_iteration(A, b, x0=None, eps=1e-6, max_iter=1000):
 
     x = np.copy(x0)
 
+    if tau is None:
+        np.linalg.eigvals(A)
+        tau = 2 / (min + max)
+
     for iteration in range(max_iter):
         # Вычисление нового приближения
-        x_new = (b - np.dot(A, x) + np.diag(A) * x) / np.diag(A)
+        x_new = (tau * b - tau * np.dot(A, x) + np.diag(A) * x) / np.diag(A)
 
         if np.linalg.norm(x_new - x) < eps:
             return x_new, iteration
